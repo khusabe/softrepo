@@ -22,9 +22,6 @@ export default function Admin() {
 	const [total, setTotal] = useState(0)
 	const [speedBps, setSpeedBps] = useState(0)
 	const [etaSec, setEtaSec] = useState<number | null>(null)
-	const [avState, setAvState] = useState<{inProgress?: boolean, stage?: string, downloaded?: number, total?: number, updatedAt?: string}>({})
-	const [avTimer, setAvTimer] = useState<number | null>(null)
-	const [avUrl, setAvUrl] = useState('')
 
 	const percent = useMemo(() => {
 		if (!total) return 0
@@ -42,24 +39,7 @@ export default function Admin() {
 		const t = localStorage.getItem('token')
 		if (!t) { location.href = '/login'; return }
 		refresh().catch(handleError)
-		fetchAvUrl().catch(()=>{})
 	}, [])
-
-	async function fetchAvUrl() {
-		try {
-			const res = await apiFetch('/api/av/config')
-			const d = await res.json()
-			if (d && d.url) setAvUrl(d.url)
-		} catch {}
-	}
-
-	async function saveAvUrl() {
-		try {
-			setError(''); setOkMsg('')
-			await apiFetch('/api/av/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: avUrl }) })
-			setOkMsg('Ссылка обновлена')
-		} catch (e) { handleError(e) }
-	}
 
 	async function refresh() {
 		const cats = await fetch('/api/categories').then(r=>r.json())
@@ -75,37 +55,6 @@ export default function Admin() {
 			return
 		}
 		setError(String(e?.message || e))
-	}
-
-	async function pollAvOnce() {
-		try {
-			const res = await apiFetch('/api/av/progress')
-			const data = await res.json()
-			setAvState(data)
-		} catch {}
-	}
-
-	function startAvPolling() {
-		if (avTimer) window.clearInterval(avTimer)
-		const id = window.setInterval(pollAvOnce, 1000)
-		setAvTimer(id)
-	}
-
-	function stopAvPolling() {
-		if (avTimer) window.clearInterval(avTimer)
-		setAvTimer(null)
-	}
-
-	async function refreshAv() {
-		try {
-			setError(''); setOkMsg('')
-			startAvPolling()
-			await apiFetch('/api/av/refresh', { method: 'POST' })
-			await pollAvOnce()
-			setOkMsg('AV база обновлена')
-		} catch (e) { handleError(e) } finally {
-			stopAvPolling()
-		}
 	}
 
 	async function addCategory(e: React.FormEvent) {
@@ -183,25 +132,10 @@ export default function Admin() {
 		<div className="container py-4">
 			<div className="d-flex justify-content-between align-items-center mb-4">
 				<h1 className="m-0">{t('adminTitle')}</h1>
-				<div className="d-flex gap-2 align-items-center">
-					<input className="form-control form-control-sm" style={{width: 340}} placeholder="AV URL" value={avUrl} onChange={e=>setAvUrl(e.target.value)} />
-					<button className="btn btn-sm btn-outline-secondary" onClick={saveAvUrl}>Сохранить</button>
-					<button className="btn btn-outline-primary btn-sm" onClick={refreshAv} disabled={!!avState.inProgress}>{t('open')} AV</button>
-					<button className="btn btn-outline-secondary btn-sm" onClick={logout}>{t('signOut')}</button>
-				</div>
+				<button className="btn btn-outline-secondary btn-sm" onClick={logout}>{t('signOut')}</button>
 			</div>
 			{error && <div className="alert alert-danger py-2">{error}</div>}
 			{okMsg && <div className="alert alert-success py-2">{okMsg}</div>}
-
-			{(avState.inProgress || avState.stage) && (
-				<div className="card card-body mb-3">
-					<div><strong>AV обновление:</strong> {avState.stage || (avState.inProgress ? 'в процессе' : '—')}</div>
-					{typeof avState.downloaded === 'number' && (
-						<div className="small text-muted">Загружено: {humanBytes(avState.downloaded)}</div>
-					)}
-					{avState.updatedAt && <div className="small text-muted">Последнее обновление: {new Date(avState.updatedAt).toLocaleString()}</div>}
-				</div>
-			)}
 
 			<h4 className="mt-4">{t('categoriesTitle')}</h4>
 			<form onSubmit={addCategory} className="row g-2 mb-3">
@@ -213,25 +147,25 @@ export default function Admin() {
 				{categories.map(c => (
 					<li key={c.id} className="list-group-item d-flex justify-content-between align-items-center">
 						<div>{c.name} <span className="badge bg-secondary">#{c.id}</span></div>
-						<button className="btn btn-sm btn-outline-danger" onClick={()=>deleteCategory(c.id)}>{t('delete')}</button>
+						<button className="btn btn-sm btn-outline-danger" onClick={()=>deleteCategory(c.id)}>Удалить</button>
 					</li>
 				))}
 			</ul>
 
-			<h4 className="mt-5">{t('uploadTitle')}</h4>
+			<h4 className="mt-4">Загрузка ПО</h4>
 			<form onSubmit={uploadSoftware} className="row g-2 mb-3">
-				<div className="col-md-3"><input className="form-control" placeholder={t('name')} value={title} onChange={e=>setTitle(e.target.value)} /></div>
-				<div className="col-md-2"><input className="form-control" placeholder={t('version')} value={version} onChange={e=>setVersion(e.target.value)} /></div>
-				<div className="col-md-3"><input className="form-control" placeholder={t('description')} value={swDesc} onChange={e=>setSwDesc(e.target.value)} /></div>
+				<div className="col-md-3"><input className="form-control" placeholder="Название" value={title} onChange={e=>setTitle(e.target.value)} /></div>
+				<div className="col-md-2"><input className="form-control" placeholder="Версия" value={version} onChange={e=>setVersion(e.target.value)} /></div>
+				<div className="col-md-3"><input className="form-control" placeholder="Описание" value={swDesc} onChange={e=>setSwDesc(e.target.value)} /></div>
 				<div className="col-md-2">
 					<select className="form-select" value={catId} onChange={e=>setCatId(Number(e.target.value))}>
-						<option value="">{t('selectCategory')}</option>
+						<option value="">Категория</option>
 						{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
 					</select>
 				</div>
 				<div className="col-md-2"><input className="form-control" type="file" onChange={e=>setFile(e.target.files?.[0] || null)} /></div>
 				<div className="col-12 d-flex align-items-center gap-3">
-					<button className="btn btn-success" type="submit" disabled={isUploading}>{t('uploadBtn')}</button>
+					<button className="btn btn-success" type="submit" disabled={isUploading}>Загрузить</button>
 					{isUploading && (
 						<div className="flex-grow-1">
 							<div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
