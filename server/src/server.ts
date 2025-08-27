@@ -6,12 +6,14 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { router } from './routes';
+import http from 'http';
 import fs from 'fs';
 import cron from 'node-cron';
 import unzipper from 'unzipper';
 import { authMiddleware } from './auth';
 
 const app = express();
+app.set('trust proxy', true);
 
 app.use(helmet());
 app.use(cors());
@@ -101,7 +103,12 @@ app.post('/api/av/config', authMiddleware, express.json(), (req, res) => {
 });
 
 const port = Number(process.env.PORT || 4000);
-app.listen(port, () => {
+const server = http.createServer(app);
+server.requestTimeout = 0;
+server.headersTimeout = 0;
+server.keepAliveTimeout = 0;
+server.timeout = 0;
+server.listen(port, () => {
   console.log(`Server listening on http://localhost:${port}`);
 });
 
