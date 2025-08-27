@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '../lib/api'
+import { t } from '../i18n'
 
 type Category = { id: number; name: string }
  type Software = { id: number; title: string; version: string; downloadsCount: number, categoryId: number }
@@ -49,7 +50,7 @@ export default function Admin() {
 
 	function handleError(e: any) {
 		if (e && e.status === 401) {
-			setError('Требуется вход. Перенаправление...')
+			setError('401: Unauthorized')
 			setTimeout(()=> location.href = '/login', 800)
 			return
 		}
@@ -60,22 +61,22 @@ export default function Admin() {
 		e.preventDefault(); setError(''); setOkMsg('')
 		try {
 			await apiFetch('/api/categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, description: desc }) })
-			setName(''); setDesc(''); setOkMsg('Категория добавлена'); await refresh()
+			setName(''); setDesc(''); setOkMsg(t('addCategorySuccess')); await refresh()
 		} catch (e) { handleError(e) }
 	}
 
 	async function deleteCategory(id: number) {
-		if (!confirm('Удалить категорию и все её файлы?')) return
+		if (!confirm(t('deleteCategoryConfirm'))) return
 		try {
 			await apiFetch(`/api/categories/${id}`, { method: 'DELETE' })
-			setOkMsg('Категория удалена'); await refresh()
+			setOkMsg(t('deleteCategorySuccess')); await refresh()
 		} catch (e) { handleError(e) }
 	}
 
 	async function uploadSoftware(e: React.FormEvent) {
 		e.preventDefault(); setError(''); setOkMsg('')
 		try {
-			if (!file || !catId) return setError('Выберите файл и категорию')
+			if (!file || !catId) return setError(t('uploadNeedSelect'))
 			const fd = new FormData()
 			fd.append('title', title)
 			fd.append('version', version)
@@ -108,17 +109,17 @@ export default function Admin() {
 				}
 				xhr.send(fd)
 			})
-			setOkMsg('Файл загружен')
+			setOkMsg(t('fileUploadedSuccess'))
 			setTitle(''); setVersion(''); setSwDesc(''); setCatId('' as any); setFile(null)
 			await refresh()
 		} catch (e) { handleError(e) } finally { setIsUploading(false) }
 	}
 
 	async function deleteSoftwareItem(id: number) {
-		if (!confirm('Удалить файл?')) return
+		if (!confirm(t('deleteFileConfirm'))) return
 		try {
 			await apiFetch(`/api/software/${id}`, { method: 'DELETE' })
-			setOkMsg('Файл удалён'); await refresh()
+			setOkMsg(t('deleteFileSuccess')); await refresh()
 		} catch (e) { handleError(e) }
 	}
 
@@ -130,17 +131,17 @@ export default function Admin() {
 	return (
 		<div className="container py-4">
 			<div className="d-flex justify-content-between align-items-center mb-4">
-				<h1 className="m-0">Админ-панель</h1>
-				<button className="btn btn-outline-secondary btn-sm" onClick={logout}>Выйти</button>
+				<h1 className="m-0">{t('adminTitle')}</h1>
+				<button className="btn btn-outline-secondary btn-sm" onClick={logout}>{t('signOut')}</button>
 			</div>
 			{error && <div className="alert alert-danger py-2">{error}</div>}
 			{okMsg && <div className="alert alert-success py-2">{okMsg}</div>}
 
-			<h4 className="mt-4">Категории</h4>
+			<h4 className="mt-4">{t('categoriesTitle')}</h4>
 			<form onSubmit={addCategory} className="row g-2 mb-3">
-				<div className="col-md-3"><input className="form-control" placeholder="Название" value={name} onChange={e=>setName(e.target.value)} /></div>
-				<div className="col-md-5"><input className="form-control" placeholder="Описание" value={desc} onChange={e=>setDesc(e.target.value)} /></div>
-				<div className="col-md-2"><button className="btn btn-primary w-100" type="submit">Добавить</button></div>
+				<div className="col-md-3"><input className="form-control" placeholder={t('name')} value={name} onChange={e=>setName(e.target.value)} /></div>
+				<div className="col-md-5"><input className="form-control" placeholder={t('description')} value={desc} onChange={e=>setDesc(e.target.value)} /></div>
+				<div className="col-md-2"><button className="btn btn-primary w-100" type="submit">{t('add')}</button></div>
 			</form>
 			<ul className="list-group mb-4">
 				{categories.map(c => (
@@ -178,11 +179,11 @@ export default function Admin() {
 				</div>
 			</form>
 
-			<h4 className="mt-4">Файлы</h4>
+			<h4 className="mt-4">{t('files')}</h4>
 			<div className="table-responsive">
 				<table className="table table-sm align-middle">
 					<thead>
-						<tr><th>ID</th><th>Название</th><th>Версия</th><th>Категория</th><th>Скачиваний</th><th></th></tr>
+						<tr><th>{t('id')}</th><th>{t('name')}</th><th>{t('versionCol')}</th><th>{t('categoryCol')}</th><th>{t('downloadsCol')}</th><th></th></tr>
 					</thead>
 					<tbody>
 						{software.map(s => (
@@ -193,8 +194,8 @@ export default function Admin() {
 								<td>{s.categoryId}</td>
 								<td>{s.downloadsCount}</td>
 								<td className="text-end">
-									<a className="btn btn-sm btn-outline-primary me-2" href={`/api/software/${s.id}/download`}>Скачать</a>
-									<button className="btn btn-sm btn-outline-danger" onClick={()=>deleteSoftwareItem(s.id)}>Удалить</button>
+									<a className="btn btn-sm btn-outline-primary me-2" href={`/api/software/${s.id}/download`}>{t('download')}</a>
+									<button className="btn btn-sm btn-outline-danger" onClick={()=>deleteSoftwareItem(s.id)}>{t('delete')}</button>
 								</td>
 							</tr>
 						))}

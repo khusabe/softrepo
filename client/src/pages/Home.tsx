@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { t } from '../i18n'
 
 type Category = { id: number; name: string }
 type Software = { id: number; title: string; version: string; downloadsCount: number; uploadDate: string; category: Category }
@@ -26,7 +27,7 @@ export default function Home() {
 
 	return (
 		<div className="container py-4">
-			<h1 className="mb-3">Каталог ПО</h1>
+			<h1 className="mb-3">{t('title')}</h1>
 			<div className="mb-4 d-flex flex-wrap gap-2">
 				<Link to="/" className="btn btn-outline-secondary btn-sm">Главная</Link>
 				<Link to="/speedtest" className="btn btn-outline-primary btn-sm">Speed Test</Link>
@@ -35,19 +36,19 @@ export default function Home() {
 			</div>
 			<div className="row g-3 mb-4">
 				<div className="col-12 col-md-4">
-					<input className="form-control" placeholder="Поиск..." value={q} onChange={e=>setQ(e.target.value)} />
+					<input className="form-control" placeholder={t('search')} value={q} onChange={e=>setQ(e.target.value)} />
 				</div>
 				<div className="col-auto">
 					<select className="form-select" value={sort} onChange={e=>setSort(e.target.value as any)}>
-						<option value="date">По дате</option>
-						<option value="downloads">По скачиваниям</option>
-						<option value="title">По названию</option>
+						<option value="date">{t('byDate')}</option>
+						<option value="downloads">{t('byDownloads')}</option>
+						<option value="title">{t('byTitle')}</option>
 					</select>
 				</div>
 				<div className="col-auto">
 					<select className="form-select" value={order} onChange={e=>setOrder(e.target.value as any)}>
-						<option value="desc">Убыв.</option>
-						<option value="asc">Возр.</option>
+						<option value="desc">{t('orderDesc')}</option>
+						<option value="asc">{t('orderAsc')}</option>
 					</select>
 				</div>
 			</div>

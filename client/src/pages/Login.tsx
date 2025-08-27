@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { t } from '../i18n'
 
 export default function Login() {
 	const [login, setLogin] = useState('')
@@ -17,12 +18,12 @@ export default function Login() {
 
 	return (
 		<div className="container py-5" style={{maxWidth: 420}}>
-			<h1 className="mb-4">Вход</h1>
+			<h1 className="mb-4">{t('loginTitle')}</h1>
 			<form onSubmit={submit} className="vstack gap-3">
-				<input className="form-control" placeholder="Логин" value={login} onChange={e=>setLogin(e.target.value)} />
-				<input className="form-control" placeholder="Пароль" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
+				<input className="form-control" placeholder={t('loginUser')} value={login} onChange={e=>setLogin(e.target.value)} />
+				<input className="form-control" placeholder={t('loginPass')} type="password" value={password} onChange={e=>setPassword(e.target.value)} />
 				{error && <div className="text-danger small">{error}</div>}
-				<button className="btn btn-primary" type="submit">Войти</button>
+				<button className="btn btn-primary" type="submit">{t('loginBtn')}</button>
 			</form>
 		</div>
 	)

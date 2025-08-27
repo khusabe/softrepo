@@ -1,8 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate, Link } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { requireAuthOrRedirect } from './lib/api'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+import { getLocale, setLocale, t } from './i18n'
 
 const Home = React.lazy(() => import('./pages/Home'))
 const Category = React.lazy(() => import('./pages/Category'))
@@ -16,6 +17,32 @@ function PrivateRoute({ children }: { children: React.ReactElement }) {
 	return children
 }
 
+function Shell({ children }: { children: React.ReactNode }) {
+	const loc = getLocale()
+	return (
+		<div>
+			<nav className="navbar navbar-light bg-light">
+				<div className="container">
+					<Link className="navbar-brand" to="/">{t('title')}</Link>
+					<div className="d-flex align-items-center gap-2">
+						<Link to="/speedtest" className="btn btn-sm btn-outline-primary">{t('speedTest')}</Link>
+						<Link to="/login" className="btn btn-sm btn-outline-secondary">{t('login')}</Link>
+						<Link to="/admin" className="btn btn-sm btn-outline-secondary">{t('admin')}</Link>
+						<div className="dropdown">
+							<button className="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">{loc.toUpperCase()}</button>
+							<ul className="dropdown-menu dropdown-menu-end">
+								<li><button className="dropdown-item" onClick={()=>setLocale('ru')}>RU</button></li>
+								<li><button className="dropdown-item" onClick={()=>setLocale('uz')}>UZ</button></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</nav>
+			{children}
+		</div>
+	)
+}
+
 function App() {
 	return (
 		<React.Suspense fallback={<div className="container py-5">Загрузка...</div>}>
@@ -25,11 +52,11 @@ function App() {
 }
 
 const router = createBrowserRouter([
-	{ path: '/', element: <Home /> },
-	{ path: '/category/:id', element: <Category /> },
-	{ path: '/login', element: <Login /> },
-	{ path: '/admin', element: <PrivateRoute><Admin /></PrivateRoute> },
-	{ path: '/speedtest', element: <SpeedTest /> },
+	{ path: '/', element: <Shell><Home /></Shell> },
+	{ path: '/category/:id', element: <Shell><Category /></Shell> },
+	{ path: '/login', element: <Shell><Login /></Shell> },
+	{ path: '/admin', element: <Shell><PrivateRoute><Admin /></PrivateRoute></Shell> },
+	{ path: '/speedtest', element: <Shell><SpeedTest /></Shell> },
 ])
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />)

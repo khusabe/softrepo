@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { t } from '../i18n'
 
 function human(n: number) {
 	if (!isFinite(n)) return '—'
@@ -81,43 +82,43 @@ export default function SpeedTest() {
 
 	return (
 		<div className="container py-5" style={{maxWidth: 900}}>
-			<h1 className="mb-1">Speed Test</h1>
+			<h1 className="mb-1">{t('speedTest')}</h1>
 			<div className="d-flex justify-content-between align-items-center mb-4">
-				<div className="text-muted">Ваш IP: {ip || '—'}</div>
-				<Link to="/" className="btn btn-outline-secondary btn-sm">На главную</Link>
+				<div className="text-muted">{t('yourIp')}: {ip || '—'}</div>
+				<Link to="/" className="btn btn-outline-secondary btn-sm">{t('backHome')}</Link>
 			</div>
 			<div className="row g-3">
 				<div className="col-12 col-md-4">
 					<div className="card text-center p-4">
-						<div className="text-muted">Пинг</div>
-						<div className="display-6">{pingMs !== null ? human(pingMs) : '—'}<small className="ms-1 fs-6">мс</small></div>
-						{phase==='ping' && <div className="small text-muted">Идёт измерение…</div>}
+						<div className="text-muted">{t('ping')}</div>
+						<div className="display-6">{pingMs !== null ? human(pingMs) : '—'}<small className="ms-1 fs-6">{t('ms')}</small></div>
+						{phase==='ping' && <div className="small text-muted">{t('measuring')}</div>}
 					</div>
 				</div>
 				<div className="col-12 col-md-4">
 					<div className="card text-center p-4">
-						<div className="text-muted">Скачивание</div>
-						<div className="display-6">{dlMbps !== null ? human(dlMbps) : '—'}<small className="ms-1 fs-6">Мбит/с</small></div>
+						<div className="text-muted">{t('downloadSpeed')}</div>
+						<div className="display-6">{dlMbps !== null ? human(dlMbps) : '—'}<small className="ms-1 fs-6">{t('mbps')}</small></div>
 						{phase==='download' && (
-							<div className="small text-muted mt-1">{(dlProgress.loaded/(1024*1024)).toFixed(1)} / {((dlProgress.total||0)/(1024*1024)).toFixed(1)} МБ</div>
+							<div className="small text-muted mt-1">{(dlProgress.loaded/(1024*1024)).toFixed(1)} / {((dlProgress.total||0)/(1024*1024)).toFixed(1)} {t('mb')}</div>
 						)}
 					</div>
 				</div>
 				<div className="col-12 col-md-4">
 					<div className="card text-center p-4">
-						<div className="text-muted">Загрузка</div>
-						<div className="display-6">{ulMbps !== null ? human(ulMbps) : '—'}<small className="ms-1 fs-6">Мбит/с</small></div>
+						<div className="text-muted">{t('uploadSpeed')}</div>
+						<div className="display-6">{ulMbps !== null ? human(ulMbps) : '—'}<small className="ms-1 fs-6">{t('mbps')}</small></div>
 						{phase==='upload' && (
-							<div className="small text-muted mt-1">{(ulProgress.sent/(1024*1024)).toFixed(1)} / {(ulProgress.total/(1024*1024)).toFixed(1)} МБ</div>
+							<div className="small text-muted mt-1">{(ulProgress.sent/(1024*1024)).toFixed(1)} / {(ulProgress.total/(1024*1024)).toFixed(1)} {t('mb')}</div>
 						)}
 					</div>
 				</div>
 			</div>
 			<div className="mt-4 d-flex gap-2">
-				<button className="btn btn-primary" onClick={runAll} disabled={running}>Начать тест</button>
-				{running && <span className="text-muted">Идёт измерение...</span>}
+				<button className="btn btn-primary" onClick={runAll} disabled={running}>{t('startTest')}</button>
+				{running && <span className="text-muted">{t('measuring')}</span>}
 			</div>
-			<p className="text-muted mt-3">Результаты ориентировочные; формат похож на Speedtest, но реализация своя.</p>
+			<p className="text-muted mt-3">{t('uploaded')}</p>
 		</div>
 	)
 }

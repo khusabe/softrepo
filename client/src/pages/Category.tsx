@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { t } from '../i18n'
 
 type Software = { id: number; title: string; version: string; downloadsCount: number }
 
@@ -15,7 +16,7 @@ export default function Category() {
 
 	return (
 		<div className="container py-4">
-			<h1 className="mb-4">Категория #{id}</h1>
+			<h1 className="mb-4">{t('categoryTitle')} #{id}</h1>
 			<div className="row g-3">
 				{items.map(s => (
 					<div key={s.id} className="col-12 col-md-6 col-lg-4">
@@ -24,7 +25,7 @@ export default function Category() {
 								<h5 className="card-title">{s.title}</h5>
 								<p className="card-subtitle mb-2 text-muted">Версия: {s.version}</p>
 								<div className="mt-auto d-flex justify-content-between">
-									<a href={`/api/software/${s.id}/download`} className="btn btn-primary">Скачать</a>
+									<a href={`/api/software/${s.id}/download`} className="btn btn-primary">{t('download')}</a>
 									<small className="text-muted">⬇️ {s.downloadsCount}</small>
 								</div>
 							</div>
