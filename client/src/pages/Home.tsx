@@ -11,9 +11,11 @@ export default function Home() {
 	const [q, setQ] = useState('')
 	const [sort, setSort] = useState<'date'|'downloads'|'title'>('date')
 	const [order, setOrder] = useState<'asc'|'desc'>('desc')
+    const [avInfo, setAvInfo] = useState<{updatedAt?: string, zip?: string} | null>(null)
 
 	useEffect(() => {
 		fetch('/api/categories').then(r=>r.json()).then(setCategories)
+		fetch('/api/av/latest').then(r=>r.json()).then(setAvInfo).catch(()=>{})
 	}, [])
 
 	useEffect(() => {
@@ -28,6 +30,14 @@ export default function Home() {
 	return (
 		<div className="container py-4">
 			<h1 className="mb-3">{t('title')}</h1>
+			{avInfo && (
+				<div className="alert alert-info d-flex justify-content-between align-items-center">
+					<div>
+						<strong>Антивирус база:</strong> {avInfo.updatedAt ? new Date(avInfo.updatedAt).toLocaleString() : '—'}
+					</div>
+					{avInfo.zip && <a className="btn btn-sm btn-primary" href={avInfo.zip}>Скачать архив</a>}
+				</div>
+			)}
 			<div className="mb-4 d-flex flex-wrap gap-2">
 				<Link to="/" className="btn btn-outline-secondary btn-sm">Главная</Link>
 				<Link to="/speedtest" className="btn btn-outline-primary btn-sm">Speed Test</Link>
